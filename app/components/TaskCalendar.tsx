@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Calendar from 'react-calendar'
-import { Task, PRIORITY_COLORS, PRIORITY_LABELS, STATUS_LABELS, STATUS_COLORS } from '../types'
+import dynamic from 'next/dynamic'
+
+const Calendar = dynamic(() => import('react-calendar'), { ssr: false })
 import 'react-calendar/dist/Calendar.css'
+import { Task, PRIORITY_COLORS, PRIORITY_LABELS, STATUS_LABELS, STATUS_COLORS } from '../types'
+
 
 interface TaskCalendarProps {
   tasks: Task[]
