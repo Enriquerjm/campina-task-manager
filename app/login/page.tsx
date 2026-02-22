@@ -15,13 +15,15 @@ export default function LoginPage() {
     setError('')
 
     if (form.username === 'mahardhika' && form.password === 'keko') {
-      localStorage.setItem('isLoggedIn', 'true')
-      router.push('/')
-    } else {
-      setError('Username atau password salah!')
-      setLoading(false)
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('isLoggedIn', 'true')
     }
-  }
+    router.push('/')
+    } else {
+        setError('Username atau password salah!')
+        setLoading(false)
+        }
+    }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

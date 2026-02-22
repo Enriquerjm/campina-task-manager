@@ -13,9 +13,11 @@ const router = useRouter()
 
 // Cek login
 useEffect(() => {
-  const isLoggedIn = localStorage.getItem('isLoggedIn')
-  if (!isLoggedIn) {
-    router.push('/login')
+  if (typeof window !== 'undefined') {
+    const isLoggedIn = localStorage.getItem('isLoggedIn')
+    if (!isLoggedIn) {
+      router.push('/login')
+    }
   }
 }, [router])
 
