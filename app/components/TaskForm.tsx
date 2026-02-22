@@ -6,7 +6,7 @@ import { Priority, PRIORITY_LABELS, Area } from '../types'
 interface TaskFormProps {
   areas: Area[]
   onSubmit: (data: {
-    area_id: number
+    area_ids: number[]
     title: string
     description: string
     priority: Priority
@@ -17,16 +17,30 @@ interface TaskFormProps {
 
 export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
   const [form, setForm] = useState({
-    area_id: areas[0]?.id || 0,
+    area_ids: [areas[0]?.id] as number[],
     title: '',
     description: '',
     priority: 'PU' as Priority,
     deadline: '',
   })
 
+  const toggleArea = (areaId: number) => {
+    setForm((prev) => {
+      const already = prev.area_ids.includes(areaId)
+      // Minimal 1 area harus dipilih
+      if (already && prev.area_ids.length === 1) return prev
+      return {
+        ...prev,
+        area_ids: already
+          ? prev.area_ids.filter((id) => id !== areaId)
+          : [...prev.area_ids, areaId],
+      }
+    })
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.title || !form.deadline) return
+    if (!form.title || !form.deadline || form.area_ids.length === 0) return
     onSubmit(form)
   }
 
@@ -43,18 +57,31 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
 
-          {/* Area */}
+          {/* Area — multi select */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Area Cabang</label>
-            <select
-              value={form.area_id}
-              onChange={(e) => setForm({ ...form, area_id: Number(e.target.value) })}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-black font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {areas.map((area) => (
-                <option key={area.id} value={area.id}>{area.name}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Area Cabang
+              <span className="ml-1 text-xs text-gray-400">(bisa pilih lebih dari 1)</span>
+            </label>
+            <div className="flex gap-2 flex-wrap">
+              {areas.map((area) => {
+                const selected = form.area_ids.includes(area.id)
+                return (
+                  <button
+                    key={area.id}
+                    type="button"
+                    onClick={() => toggleArea(area.id)}
+                    className={`px-4 py-2 rounded-lg border text-sm font-semibold transition-all ${
+                      selected
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-black border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    {selected ? '✓ ' : ''}{area.name}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           {/* Title */}

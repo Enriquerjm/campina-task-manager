@@ -7,6 +7,17 @@ import TaskCard from './components/TaskCard'
 import TaskForm from './components/TaskForm'
 import DeadlineNotifier from './components/DeadlineNotifier'
 import TaskCalendar from './components/TaskCalendar'
+import { useRouter } from 'next/navigation'
+
+const router = useRouter()
+
+// Cek login
+useEffect(() => {
+  const isLoggedIn = localStorage.getItem('isLoggedIn')
+  if (!isLoggedIn) {
+    router.push('/login')
+  }
+}, [router])
 
 export default function Home() {
   const [areas, setAreas] = useState<Area[]>([])
@@ -40,20 +51,24 @@ export default function Home() {
 
   // Tambah task baru
   const handleAddTask = async (formData: {
-    area_id: number
+    area_ids: number[]
     title: string
     description: string
     priority: Task['priority']
     deadline: string
   }) => {
+    const { area_ids, ...rest } = formData
+
+    // Buat task untuk setiap area yang dipilih
+    const inserts = area_ids.map((area_id) => ({ ...rest, area_id }))
+
     const { data, error } = await supabase
       .from('tasks')
-      .insert([formData])
+      .insert(inserts)
       .select()
-      .single()
 
     if (!error && data) {
-      setTasks((prev) => [data, ...prev])
+      setTasks((prev) => [...data, ...prev])
       setShowForm(false)
     }
   }
@@ -143,12 +158,23 @@ export default function Home() {
             <h1 className="text-xl font-bold text-gray-800">🍦 Campina Task Manager</h1>
             <p className="text-xs text-gray-400">Kelola tugas per cabang</p>
           </div>
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-          >
-            + Tambah Task
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowForm(true)}
+              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              + Tambah Task
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem('isLoggedIn')
+                router.push('/login')
+              }}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 
