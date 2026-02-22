@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@import 'react-calendar/dist/Calendar.css';
+
+.react-calendar {
+  border: none !important;
+  font-family: inherit !important;
+  width: 100% !important;
+}
+.react-calendar__tile {
+  border-radius: 8px !important;
+  position: relative;
+}
+.react-calendar__tile--active {
+  background: #3b82f6 !important;
+  color: white !important;
+}
+.react-calendar__tile--now {
+  background: #eff6ff !important;
+  color: #3b82f6 !important;
+  font-weight: bold;
+}
+.react-calendar__tile--active.react-calendar__tile--now {
+  background: #3b82f6 !important;
+  color: white !important;
+}

@@ -2,11 +2,9 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import { Task, PRIORITY_COLORS, STATUS_LABELS, STATUS_COLORS } from '../types'
 
 const Calendar = dynamic(() => import('react-calendar'), { ssr: false })
-import 'react-calendar/dist/Calendar.css'
-import { Task, PRIORITY_COLORS, PRIORITY_LABELS, STATUS_LABELS, STATUS_COLORS } from '../types'
-
 
 interface TaskCalendarProps {
   tasks: Task[]
@@ -16,15 +14,12 @@ interface TaskCalendarProps {
 export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
-  // Ambil semua tanggal yang ada task-nya
   const taskDates = tasks
     .filter((t) => t.status !== 'done')
     .map((t) => new Date(t.deadline).toDateString())
 
-  // Cek apakah tanggal tertentu ada task-nya
   const hasTask = (date: Date) => taskDates.includes(date.toDateString())
 
-  // Cek apakah ada task overdue di tanggal tersebut
   const hasOverdue = (date: Date) => {
     return tasks.some(
       (t) =>
@@ -34,7 +29,6 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
     )
   }
 
-  // Ambil task berdasarkan tanggal yang dipilih
   const selectedTasks = selectedDate
     ? tasks.filter(
         (t) =>
@@ -42,7 +36,6 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
       )
     : []
 
-  // Ambil nama area
   const getAreaName = (areaId: number) =>
     areas.find((a) => a.id === areaId)?.name || '-'
 
@@ -54,30 +47,6 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
 
         {/* Kalender */}
         <div className="flex-shrink-0">
-          <style>{`
-            .react-calendar {
-              border: none !important;
-              font-family: inherit !important;
-              width: 100% !important;
-            }
-            .react-calendar__tile {
-              border-radius: 8px !important;
-              position: relative;
-            }
-            .react-calendar__tile--active {
-              background: #3b82f6 !important;
-              color: white !important;
-            }
-            .react-calendar__tile--now {
-              background: #eff6ff !important;
-              color: #3b82f6 !important;
-              font-weight: bold;
-            }
-            .react-calendar__tile--active.react-calendar__tile--now {
-              background: #3b82f6 !important;
-              color: white !important;
-            }
-          `}</style>
           <Calendar
             onChange={(val) => setSelectedDate(val as Date)}
             value={selectedDate}
@@ -113,7 +82,7 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
           </div>
         </div>
 
-        {/* Task list berdasarkan tanggal dipilih */}
+        {/* Task list */}
         <div className="flex-1">
           {selectedDate ? (
             <>
@@ -133,7 +102,6 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
                       key={task.id}
                       className="border border-gray-100 rounded-xl p-3 hover:shadow-sm transition-shadow"
                     >
-                      {/* Priority + Area */}
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${PRIORITY_COLORS[task.priority]}`}>
                           {task.priority}
@@ -142,16 +110,10 @@ export default function TaskCalendar({ tasks, areas }: TaskCalendarProps) {
                           {getAreaName(task.area_id)}
                         </span>
                       </div>
-
-                      {/* Title */}
                       <p className="text-sm font-medium text-gray-800">{task.title}</p>
-
-                      {/* Description */}
                       {task.description && (
                         <p className="text-xs text-gray-400 mt-1">{task.description}</p>
                       )}
-
-                      {/* Status */}
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-2 inline-block ${STATUS_COLORS[task.status]}`}>
                         {STATUS_LABELS[task.status]}
                       </span>
