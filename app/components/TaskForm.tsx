@@ -33,7 +33,7 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-lg font-bold text-gray-800">Tambah Task Baru</h2>
@@ -42,14 +42,14 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          
+
           {/* Area */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Area Cabang</label>
             <select
               value={form.area_id}
               onChange={(e) => setForm({ ...form, area_id: Number(e.target.value) })}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-black font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {areas.map((area) => (
                 <option key={area.id} value={area.id}>{area.name}</option>
@@ -65,7 +65,7 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="contoh: Laporan stok bulan ini"
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-black font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
@@ -78,7 +78,7 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Detail tambahan..."
               rows={3}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-black font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
           </div>
 
@@ -91,10 +91,10 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
                   key={p}
                   type="button"
                   onClick={() => setForm({ ...form, priority: p })}
-                  className={`text-xs px-3 py-2 rounded-lg border font-medium transition-all ${
+                  className={`text-xs px-3 py-2 rounded-lg border font-semibold transition-all ${
                     form.priority === p
                       ? 'bg-blue-500 text-white border-blue-500'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'
+                      : 'bg-white text-black border-gray-200 hover:border-blue-300'
                   }`}
                 >
                   {p} — {PRIORITY_LABELS[p]}
@@ -110,7 +110,7 @@ export default function TaskForm({ areas, onSubmit, onClose }: TaskFormProps) {
               type="date"
               value={form.deadline}
               onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-black font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
