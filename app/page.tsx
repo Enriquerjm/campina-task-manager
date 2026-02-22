@@ -1,32 +1,65 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import { Area, Task } from './types'
 import TaskCard from './components/TaskCard'
 import TaskForm from './components/TaskForm'
 import DeadlineNotifier from './components/DeadlineNotifier'
 import TaskCalendar from './components/TaskCalendar'
-import { useRouter } from 'next/navigation'
-
-const router = useRouter()
-
-// Cek login
-useEffect(() => {
-  if (typeof window !== 'undefined') {
-    const isLoggedIn = localStorage.getItem('isLoggedIn')
-    if (!isLoggedIn) {
-      router.push('/login')
-    }
-  }
-}, [router])
 
 export default function Home() {
+  const router = useRouter()
   const [areas, setAreas] = useState<Area[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [selectedArea, setSelectedArea] = useState<Area | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  // Cek login
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isLoggedIn = localStorage.getItem('isLoggedIn')
+      if (!isLoggedIn) {
+        router.push('/login')
+      }
+    }
+  }, [router])
+
+  // Realtime listener
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime-tasks')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tasks' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTasks((prev) => [payload.new as Task, ...prev])
+          }
+          if (payload.eventType === 'UPDATE') {
+            setTasks((prev) =>
+              prev.map((t) =>
+                t.id === (payload.new as Task).id ? (payload.new as Task) : t
+              )
+            )
+          }
+          if (payload.eventType === 'DELETE') {
+            setTasks((prev) =>
+              prev.filter((t) => t.id !== (payload.old as Task).id)
+            )
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   // Ambil data areas dan tasks dari Supabase
   useEffect(() => {
@@ -60,8 +93,6 @@ export default function Home() {
     deadline: string
   }) => {
     const { area_ids, ...rest } = formData
-
-    // Buat task untuk setiap area yang dipilih
     const inserts = area_ids.map((area_id) => ({ ...rest, area_id }))
 
     const { data, error } = await supabase
@@ -118,16 +149,13 @@ export default function Home() {
     }
   }
 
-  // Filter tasks berdasarkan area yang dipilih
   const filteredTasks = selectedArea
     ? tasks.filter((t) => t.area_id === selectedArea.id)
     : []
 
-  // Hitung jumlah task per area
   const getTaskCount = (areaId: number) =>
     tasks.filter((t) => t.area_id === areaId).length
 
-  // Hitung task yang deadline-nya dekat (dalam 3 hari)
   const getUrgentCount = (areaId: number) => {
     const threeDaysFromNow = new Date()
     threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
@@ -214,17 +242,11 @@ export default function Home() {
         {/* Task List per Area */}
         {selectedArea && (
           <div>
-            {/* Area Title */}
             <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold text-gray-800">
-                {selectedArea.name}
-              </h2>
-              <span className="text-sm text-gray-400">
-                {filteredTasks.length} task
-              </span>
+              <h2 className="text-xl font-bold text-gray-800">{selectedArea.name}</h2>
+              <span className="text-sm text-gray-400">{filteredTasks.length} task</span>
             </div>
 
-            {/* Tasks grouped by priority */}
             {priorities.map((priority) => {
               const priorityTasks = filteredTasks.filter(
                 (t) => t.priority === priority
@@ -258,7 +280,6 @@ export default function Home() {
               )
             })}
 
-            {/* Kalau tidak ada task */}
             {filteredTasks.length === 0 && (
               <div className="text-center py-16 text-gray-400">
                 <p className="text-4xl mb-3">📋</p>
@@ -279,7 +300,6 @@ export default function Home() {
           <TaskCalendar tasks={tasks} areas={areas} />
         </div>
 
-        {/* Kalau belum pilih area */}
         {!selectedArea && (
           <div className="text-center py-16 text-gray-400">
             <p className="text-4xl mb-3">👆</p>
@@ -288,7 +308,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* Form Modal */}
       {showForm && (
         <TaskForm
           areas={areas}
