@@ -135,7 +135,7 @@ export default function Home() {
     }
   }
 
-  // Update deadline task
+   // Update deadline task
   const handleDeadlineChange = async (taskId: number, deadline: string) => {
     const { error } = await supabase
       .from('tasks')
@@ -145,6 +145,23 @@ export default function Home() {
     if (!error) {
       setTasks((prev) =>
         prev.map((t) => (t.id === taskId ? { ...t, deadline } : t))
+      )
+    }
+  }
+
+  // Edit task
+  const handleEdit = async (
+    taskId: number,
+    data: { title: string; description: string; priority: Task['priority'] }
+  ) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', taskId)
+
+    if (!error) {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, ...data } : t))
       )
     }
   }
@@ -273,6 +290,7 @@ export default function Home() {
                         onStatusChange={handleStatusChange}
                         onDelete={handleDelete}
                         onDeadlineChange={handleDeadlineChange}
+                        onEdit={handleEdit}
                       />
                     ))}
                   </div>
